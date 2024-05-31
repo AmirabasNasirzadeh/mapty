@@ -16,7 +16,7 @@ navigator.geolocation.getCurrentPosition(
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
     const coords = [latitude, longitude];
-    const map = L.map(`map`).setView(coords, 12);
+    const map = L.map(`map`).setView(coords, 15);
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
