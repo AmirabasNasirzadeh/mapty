@@ -56,6 +56,8 @@ class App {
   constructor() {
     this._getPosition();
 
+    this._getLocalStorage();
+
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
     containerWorkouts.addEventListener(`click`, this._moveToWorkout.bind(this));
@@ -78,6 +80,10 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on(`click`, this._showForm.bind(this));
+
+    this.workouts.forEach((work) => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _renderTitle(workout) {
@@ -96,9 +102,18 @@ class App {
       "December",
     ];
 
-    const title = `${workout.emojy} ${workout.type[0].toUpperCase()}${workout.type.slice(1)} on ${
-      months[workout.date.getMonth()]
-    } ${workout.date.getDate()}`;
+    let title;
+
+    if (typeof workout.date === "string") {
+      title = `${workout.emojy} ${workout.type[0].toUpperCase()}${workout.type.slice(1)} on ${
+        months[+workout.date.slice(5, 7)]
+      } ${+workout.date.slice(8, 10)}`;
+    } else {
+      title = `${workout.emojy} ${workout.type[0].toUpperCase()}${workout.type.slice(1)} on ${
+        months[workout.date.getMonth()]
+      } ${workout.date.getDate()}`;
+    }
+
     return title;
   }
 
@@ -147,6 +162,24 @@ class App {
     form.insertAdjacentHTML(`afterend`, html);
   }
 
+  _renderWorkoutMarker(workout) {
+    const lat = +workout.coords[0];
+    const lng = +workout.coords[1];
+    L.marker([lat, lng])
+      .addTo(this.#map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          maxHeight: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: `${workout.type}-popup`,
+        })
+      )
+      .setPopupContent(`${this._renderTitle(workout)}`)
+      .openPopup();
+  }
+
   _showForm(mapE) {
     this.#mapEvent = mapE;
     form.classList.remove(`hidden`);
@@ -163,6 +196,20 @@ class App {
     setTimeout(() => {
       form.style.display = "grid";
     }, 1000);
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem(`workouts`, JSON.stringify(this.workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem(`workouts`));
+    if (!data) return;
+    this.workouts = data;
+
+    this.workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
   }
 
   _toggleElevationField() {
@@ -211,25 +258,16 @@ class App {
     }
 
     // Render workout on map as marker
-    L.marker([lat, lng])
-      .addTo(this.#map)
-      .bindPopup(
-        L.popup({
-          maxWidth: 250,
-          maxHeight: 100,
-          autoClose: false,
-          closeOnClick: false,
-          className: `${workout.type}-popup`,
-        })
-      )
-      .setPopupContent(`${this._renderTitle(workout)}`)
-      .openPopup();
+    this._renderWorkoutMarker(workout);
 
     // Render workout on list
     this._renderWorkout(workout);
 
     // Hide form + Clear input fields
     this._hideForm();
+
+    // Set Localstorage
+    this._setLocalStorage();
   }
 
   _moveToWorkout(e) {
