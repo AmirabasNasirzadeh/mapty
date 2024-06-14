@@ -54,13 +54,18 @@ class App {
   workouts = [];
 
   constructor() {
+    // Get your current position.
     this._getPosition();
 
+    // Get data from Localstorage
     this._getLocalStorage();
 
+    // Event handlers
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
     containerWorkouts.addEventListener(`click`, this._moveToWorkout.bind(this));
+
+    window.addEventListener(`load`, this._deleteIconEvent.bind(this));
   }
 
   _getPosition() {
@@ -120,6 +125,7 @@ class App {
   _renderWorkout(workout) {
     let html = `<li class="workout workout--${workout.type}" data-id="${workout.id}">
                     <h2 class="workout__title">${this._renderTitle(workout)}</h2>
+                    <ion-icon class="delete__icon" name="close-outline"></ion-icon>
                     <div class="workout__details">
                       <span class="workout__icon">${workout.emojy}</span>
                       <span class="workout__value">${workout.distance}</span>
@@ -160,6 +166,7 @@ class App {
     }
 
     form.insertAdjacentHTML(`afterend`, html);
+    this._deleteIconEvent();
   }
 
   _renderWorkoutMarker(workout) {
@@ -278,12 +285,43 @@ class App {
     const workoutId = workoutEl.dataset.id;
     const workout = this.workouts.find((workout) => workout.id === workoutId);
 
-    this.#map.setView([workout.coords[0], workout.coords[1]], 13, {
-      animate: true,
-      pan: {
-        duration: 1,
-      },
+    if (workout !== undefined) {
+      this.#map.setView([workout.coords[0], workout.coords[1]], 13, {
+        animate: true,
+        pan: {
+          duration: 1,
+        },
+      });
+    }
+  }
+
+  _deleteIconEvent() {
+    const allIcons = document.querySelectorAll(`.delete__icon`);
+    allIcons.forEach((icon) => {
+      icon.addEventListener(`click`, this._deleteWorkout.bind(this));
     });
+
+    const deleteAllButton = document.querySelector(".delete__all");
+    deleteAllButton.addEventListener(`click`, this._deleteAllWorkouts.bind(this));
+  }
+
+  _deleteWorkout(e) {
+    if (confirm(`Are you sure you want to delete this workout?`)) {
+      const workoutEl = e.target.closest(`.workout`);
+      const workoutId = workoutEl.dataset.id;
+      console.log(workoutId);
+      const workout = this.workouts.find((workout) => workout.id === workoutId);
+      const workoutIndex = this.workouts.indexOf(workout);
+      this.workouts.splice(workoutIndex, 1);
+      this._setLocalStorage();
+      location.reload();
+    }
+  }
+
+  _deleteAllWorkouts() {
+    this.workouts = [];
+    this._setLocalStorage();
+    location.reload();
   }
 }
 
