@@ -66,6 +66,8 @@ class App {
     containerWorkouts.addEventListener(`click`, this._moveToWorkout.bind(this));
 
     window.addEventListener(`load`, this._deleteIconEvent.bind(this));
+
+    this._hiddenDeleteAllWorkoutsButton();
   }
 
   _getPosition() {
@@ -275,6 +277,9 @@ class App {
 
     // Set Localstorage
     this._setLocalStorage();
+
+    // Hidden or show the "delete all workouts" button
+    this._hiddenDeleteAllWorkoutsButton();
   }
 
   _moveToWorkout(e) {
@@ -306,22 +311,33 @@ class App {
   }
 
   _deleteWorkout(e) {
-    if (confirm(`Are you sure you want to delete this workout?`)) {
-      const workoutEl = e.target.closest(`.workout`);
-      const workoutId = workoutEl.dataset.id;
-      console.log(workoutId);
-      const workout = this.workouts.find((workout) => workout.id === workoutId);
-      const workoutIndex = this.workouts.indexOf(workout);
-      this.workouts.splice(workoutIndex, 1);
-      this._setLocalStorage();
-      location.reload();
-    }
+    if (!confirm(`Are you sure you want to delete this workout?`)) return;
+    const workoutEl = e.target.closest(`.workout`);
+    const workoutId = workoutEl.dataset.id;
+    console.log(workoutId);
+    const workout = this.workouts.find((workout) => workout.id === workoutId);
+    const workoutIndex = this.workouts.indexOf(workout);
+    this.workouts.splice(workoutIndex, 1);
+    this._setLocalStorage();
+    this._hiddenDeleteAllWorkoutsButton();
+    location.reload();
   }
 
   _deleteAllWorkouts() {
+    if (!confirm(`Are you sure you want to delete all workouts?`)) return;
     this.workouts = [];
     this._setLocalStorage();
+    this._hiddenDeleteAllWorkoutsButton();
     location.reload();
+  }
+
+  _hiddenDeleteAllWorkoutsButton() {
+    const deleteAllButton = document.querySelector(".delete__all");
+    if (this.workouts.length === 0) {
+      deleteAllButton.classList.add(`form__row--hidden`);
+    } else {
+      deleteAllButton.classList.remove(`form__row--hidden`);
+    }
   }
 }
 

@@ -92,8 +92,8 @@ a:visited {
 }
 
 .delete__all {
-  background-color: var(--color-light--1);
-  color: var(--color-dark--1);
+  background-color: var(--color-dark--2);
+  color: var(--color-light--2);
   font-size: 1.6rem;
   width: 30%;
   border-radius: 0.5rem;
@@ -101,10 +101,6 @@ a:visited {
   font-weight: 600;
   transition: all 0.2s;
   cursor: pointer;
-}
-
-.delete__all:hover {
-  background-color: var(--color-light--2);
 }
 
 .delete__icon:hover {
