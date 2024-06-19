@@ -68,6 +68,9 @@ class App {
     window.addEventListener(`load`, this._deleteIconEvent.bind(this));
 
     this._hiddenDeleteAllWorkoutsButton();
+
+    const deleteAllButton = document.querySelector(".delete__all");
+    deleteAllButton.addEventListener(`click`, this._deleteAllWorkouts.bind(this));
   }
 
   _getPosition() {
@@ -305,9 +308,6 @@ class App {
     allIcons.forEach((icon) => {
       icon.addEventListener(`click`, this._deleteWorkout.bind(this));
     });
-
-    const deleteAllButton = document.querySelector(".delete__all");
-    deleteAllButton.addEventListener(`click`, this._deleteAllWorkouts.bind(this));
   }
 
   _deleteWorkout(e) {
